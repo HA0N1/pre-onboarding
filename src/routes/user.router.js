@@ -11,5 +11,6 @@ const userService = new UserService(userRepo);
 const userController = new UserController(userService, userRepo);
 
 router.post('/signup', userController.register);
+router.post('/login', userController.login);
 
 export default router;

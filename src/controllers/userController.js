@@ -26,8 +26,24 @@ export class UserController {
         })),
       };
 
-      // Send the response
       return res.status(201).json(response);
+    } catch (err) {
+      return res.status(500).json({
+        error: err.message,
+      });
+    }
+  };
+
+  login = async (req, res, next) => {
+    try {
+      const { username, password } = req.body;
+
+      const existingUser = await this.userService.checkExistingUser(username, password);
+      if (!existingUser) throw new Error('존재하지 않는 사용자 입니다.');
+
+      const token = await this.userService.login(username, password);
+
+      return res.status(201).json({ token });
     } catch (err) {
       return res.status(500).json({
         error: err.message,

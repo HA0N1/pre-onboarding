@@ -4,8 +4,9 @@ export class UserRepo {
     this.prisma = prisma;
   }
 
-  async findUserByNickname(username) {
+  async findUserByName(username) {
     const user = await this.prisma.user.findUnique({ where: { username } });
+
     return user;
   }
 
@@ -26,6 +27,4 @@ export class UserRepo {
       },
     });
   }
-
-  async login(username, password) {}
 }
