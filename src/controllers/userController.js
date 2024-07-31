@@ -12,7 +12,7 @@ export class UserController {
     this.usersRepo = userRepo;
   }
 
-  register = async (req, res, next) => {
+  register = async (req, res) => {
     try {
       const { username, password, nickname } = await userJoi.validateAsync(req.body);
 
@@ -25,7 +25,6 @@ export class UserController {
           authorityName: auth.authorityName,
         })),
       };
-
       return res.status(201).json(response);
     } catch (err) {
       return res.status(500).json({
@@ -34,7 +33,7 @@ export class UserController {
     }
   };
 
-  login = async (req, res, next) => {
+  login = async (req, res) => {
     try {
       const { username, password } = req.body;
 
