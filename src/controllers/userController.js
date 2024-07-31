@@ -1,11 +1,3 @@
-import Joi from 'joi';
-
-const userJoi = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().required(),
-  nickname: Joi.string().required(),
-});
-
 export class UserController {
   constructor(userService, userRepo) {
     this.userService = userService;
@@ -14,7 +6,7 @@ export class UserController {
 
   register = async (req, res) => {
     try {
-      const { username, password, nickname } = await userJoi.validateAsync(req.body);
+      const { username, password, nickname } = req.body;
 
       const createUser = await this.userService.register(username, password, nickname);
 

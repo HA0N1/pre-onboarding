@@ -1,6 +1,5 @@
 import { UserController } from '../src/controllers/userController';
 import { beforeEach, expect, jest } from '@jest/globals';
-import Joi from 'joi';
 
 describe('Controller Test', () => {
   let mockUserService;
