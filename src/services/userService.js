@@ -8,7 +8,11 @@ export class UserService {
   }
 
   async registerUser(username, nickname, password) {
-    await this.checkExistingUser(username);
+    const existingUser = await this.checkExistingUser(username);
+
+    if (existingUser) {
+      throw new CustomError('이미 존재하는 사용자명입니다.', 400);
+    }
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const user = await this.userRepo.createUser(username, nickname, hashedPassword);
@@ -22,10 +26,7 @@ export class UserService {
 
   // 존재하는 사용자명 조회
   async checkExistingUser(username) {
-    const existingUser = await this.userRepo.findUserByUsername(username);
-    if (existingUser) {
-      throw new CustomError('이미 존재하는 사용자명입니다.', 400);
-    }
+    return await this.userRepo.findUserByUsername(username);
   }
 
   /**
@@ -36,7 +37,7 @@ export class UserService {
    */
   async login(username, password) {
     //1. 아이디/비밀번호 확인
-    const user = await this.verifyUser(username, password);
+    await this.verifyUser(username, password);
 
     //2. authService를 통해 토큰 발급
     const payload = { username };
@@ -44,7 +45,7 @@ export class UserService {
     const refreshToken = this.authService.generateRefreshToken(payload);
 
     // 3. 리프레시 토큰 저장
-    await this.userRepo.savaRefreshToken(username, refreshToken);
+    await this.userRepo.saveRefreshToken(username, refreshToken);
 
     return { accessToken, refreshToken };
   }
@@ -75,6 +76,6 @@ export class UserService {
     }
 
     const user = await this.authService.verifyAccessToken(accessToken);
-    await this.userRepo.removeRefreshTokne(user.username);
+    await this.userRepo.removeRefreshToken(user.username);
   }
 }

@@ -32,7 +32,7 @@ export class UserRepo {
     });
   }
 
-  async savaRefreshToken(username, refreshToken) {
+  async saveRefreshToken(username, refreshToken) {
     await this.prisma.user.update({
       where: { username },
       data: { refreshToken: refreshToken },

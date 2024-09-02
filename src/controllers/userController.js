@@ -38,12 +38,15 @@ export class UserController {
         throw new CustomError('요청 정보가 올바르지 않습니다.', 400);
       }
 
-      const { accessToken, refreshToken } = await this.userService.login(username, password);
+      const token = await this.userService.login(username, password);
 
       res.status(200).json({
         success: true,
         message: '로그인에 성공하였습니다.',
-        data: { accessToken, refreshToken },
+        data: {
+          accessToken: token.accessToken,
+          refreshToken: token.refreshToken,
+        },
       });
     } catch (err) {
       next(err);
@@ -78,23 +81,6 @@ export class UserController {
       res.status(200).json({ success: true, message: '로그아웃 되었습니다.' });
     } catch (err) {
       next(err);
-    }
-  };
-
-  login = async (req, res) => {
-    try {
-      const { username, password } = req.body;
-
-      const existingUser = await this.userService.checkExistingUser(username, password);
-      if (!existingUser) throw new Error('존재하지 않는 사용자 입니다.');
-
-      const token = await this.userService.login(username, password);
-
-      return res.status(201).json({ token });
-    } catch (err) {
-      return res.status(500).json({
-        error: err.message,
-      });
     }
   };
 }

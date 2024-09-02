@@ -84,7 +84,6 @@ const userController = new UserController(userService);
  *         description: 서버 오류
  */
 router.post('/signup', userController.register);
-router.post('/login', userController.login);
 
 /**
  * @swagger
@@ -119,9 +118,21 @@ router.post('/login', userController.login);
  *             schema:
  *               type: object
  *               properties:
- *                 token:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
  *                   type: string
- *                   example: 'eKDIkdfjoakIdkfjpekdkcjdkoIOdjOKJDFOlLDKFJKL'
+ *                   example: 로그인에 성공하였습니다.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: 액세스 토큰
+ *                     refreshToken:
+ *                       type: string
+ *                       description: 리프레시 토큰
  *       400:
  *         description: 잘못된 요청
  *       401:
