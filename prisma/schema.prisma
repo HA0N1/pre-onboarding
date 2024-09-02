@@ -8,20 +8,18 @@ datasource db {
 }
 
 model User {
-    id          Int         @id @default(autoincrement())
-    username    String      @unique
-    password    String
-    nickname    String
-    authorities Authority[] @relation("UserAuthorities")
+    id           Int      @id @default(autoincrement())
+    username     String   @unique
+    nickname     String
+    password     String
+    roles        Role[]   @relation("UserRoles")
+    refreshToken String?
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
 }
 
-model Authority {
+model Role {
     id            Int    @id @default(autoincrement())
-    authorityName Role
-    users         User[] @relation("UserAuthorities")
-}
-
-enum Role {
-    ROLE_USER
-    ROLE_ADMIN
+    authorityName String @unique
+    users         User[] @relation("UserRoles")
 }

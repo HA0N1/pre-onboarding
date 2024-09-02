@@ -1,31 +1,48 @@
-import { Role } from '@prisma/client';
 export class UserRepo {
   constructor(prisma) {
     this.prisma = prisma;
   }
 
-  async findUserByNickname(username) {
-    const user = await this.prisma.user.findUnique({ where: { username } });
+  async findUserByUsername(username) {
+    const user = await this.prisma.user.findUnique({
+      where: { username },
+      include: { roles: true },
+    });
     return user;
   }
 
-  async register(username, password, nickname) {
-    return await this.prisma.user.create({
+  async createUser(username, nickname, hashedPassword) {
+    return this.prisma.user.create({
       data: {
         username,
-        password,
         nickname,
-        authorities: {
-          create: {
-            authorityName: Role.ROLE_USER,
-          },
+        password: hashedPassword,
+        roles: {
+          connectOrCreate: [
+            {
+              where: { authorityName: 'ROLE_USER' },
+              create: { authorityName: 'ROLE_USER' },
+            },
+          ],
         },
       },
       include: {
-        authorities: true,
+        roles: true,
       },
     });
   }
 
-  async login(username, password) {}
+  async savaRefreshToken(username, refreshToken) {
+    await this.prisma.user.update({
+      where: { username },
+      data: { refreshToken: refreshToken },
+    });
+  }
+
+  async removeRefreshToken(username) {
+    this.prisma.user.update({
+      where: { username },
+      data: { refreshToken: null },
+    });
+  }
 }
