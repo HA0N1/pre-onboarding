@@ -6,7 +6,7 @@ export class UserController {
     this.authService = authService;
   }
 
-  register = async (req, res, next) => {
+  register = async (req, res) => {
     try {
       const { username, nickname, password } = req.body;
 
@@ -78,6 +78,23 @@ export class UserController {
       res.status(200).json({ success: true, message: '로그아웃 되었습니다.' });
     } catch (err) {
       next(err);
+    }
+  };
+
+  login = async (req, res) => {
+    try {
+      const { username, password } = req.body;
+
+      const existingUser = await this.userService.checkExistingUser(username, password);
+      if (!existingUser) throw new Error('존재하지 않는 사용자 입니다.');
+
+      const token = await this.userService.login(username, password);
+
+      return res.status(201).json({ token });
+    } catch (err) {
+      return res.status(500).json({
+        error: err.message,
+      });
     }
   };
 }

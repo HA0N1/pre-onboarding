@@ -84,6 +84,7 @@ const userController = new UserController(userService);
  *         description: 서버 오류
  */
 router.post('/signup', userController.register);
+router.post('/login', userController.login);
 
 /**
  * @swagger
