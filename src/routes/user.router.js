@@ -142,9 +142,119 @@ router.post('/signup', userController.register);
  */
 router.post('/login', userController.login);
 
+/**
+ * @swagger
+ * /token:
+ *   post:
+ *     summary: Access Token 재발급 API
+ *     description: Refresh Token으로 Access Token을 재발급하는 API입니다.
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *                 description: Refresh Token
+ *     responses:
+ *       200:
+ *         description: 새 액세스 토큰 발급 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: 새 액세스 토큰 발급에 성공하였습니다.
+ *                 data:
+ *                   type: object
+ *                   properties:
+ *                     accessToken:
+ *                       type: string
+ *                       description: 새로 발급된 액세스 토큰
+ *       400:
+ *         description: 잘못된 요청
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: 올바른 리프레쉬 토큰을 입력해야합니다.
+ *       401:
+ *         description: 인증 실패
+ *       500:
+ *         description: 서버 오류
+ */
 router.post('/token', userController.refreshToken);
 
 // jwt middleware test용 logout
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: 로그아웃 API
+ *     description: 사용자를 로그아웃 처리하는 API입니다.
+ *     tags: [Users]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - accessToken
+ *             properties:
+ *               accessToken:
+ *                 type: string
+ *                 description: 현재 사용 중인 액세스 토큰
+ *     responses:
+ *       200:
+ *         description: 로그아웃 성공
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 message:
+ *                   type: string
+ *                   example: 로그아웃 되었습니다.
+ *       400:
+ *         description: 잘못된 요청
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: false
+ *                 message:
+ *                   type: string
+ *                   example: 입력된 토큰이 로그인 된 사용자의 토큰과 일치하지 않습니다.
+ *       401:
+ *         description: 인증 실패
+ *       500:
+ *         description: 서버 오류
+ */
 router.post('/logout', jwtValidate(authService), userController.logout);
 
 export default router;
