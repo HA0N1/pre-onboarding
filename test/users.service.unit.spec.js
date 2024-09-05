@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, jest } from '@jest/globals';
+import { beforeEach, describe, expect, jest, test } from '@jest/globals';
 import { UserService } from '../src/services/userService';
 import { CustomError } from '../src/utils/customError';
 import bcrypt from 'bcrypt';
@@ -50,7 +50,7 @@ describe('Service Test', () => {
       mockUserRepo.findUserByUsername.mockResolvedValue({ username: userData.username });
 
       await expect(userService.registerUser(userData.username, userData.nickname, userData.password)).rejects.toThrow(
-        CustomError,
+        new CustomError('이미 존재하는 사용자명입니다.', 400),
       );
 
       expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
@@ -87,7 +87,9 @@ describe('Service Test', () => {
 
       mockUserRepo.findUserByUsername.mockResolvedValue(null);
 
-      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(CustomError);
+      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(
+        new CustomError('존재하지 않는 사용자입니다.', 401),
+      );
       expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
       expect(bcrypt.compare).not.toHaveBeenCalled();
     });
@@ -98,7 +100,9 @@ describe('Service Test', () => {
 
       mockUserRepo.findUserByUsername.mockResolvedValue(storedUser);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
-      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(CustomError);
+      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(
+        new CustomError('사용자명 또는 비밀번호가 올바르지 않습니다.', 401),
+      );
 
       expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
       expect(bcrypt.compare).toHaveBeenCalledWith(userData.password, storedUser.password);
@@ -119,6 +123,29 @@ describe('Service Test', () => {
     });
   });
   describe('로그아웃', () => {
-    test('로그아웃 성공', async () => {});
+    test('로그아웃 성공', async () => {
+      const userData = { username: 'testuser' };
+      const accessToken = 'access-token';
+      const currentToken = 'access-token';
+
+      mockAuthService.verifyAccessToken.mockResolvedValue(userData);
+      mockUserRepo.removeRefreshToken.mockResolvedValue();
+
+      await userService.logout(accessToken, currentToken);
+
+      expect(mockAuthService.verifyAccessToken).toHaveBeenCalledWith(accessToken);
+      expect(mockUserRepo.removeRefreshToken).toHaveBeenCalledWith(userData.username);
+    });
+    test('로그아웃 실패 - 토큰 불일치', async () => {
+      const accessToken = 'access-token';
+      const currentToken = 'different-token';
+
+      await expect(userService.logout(accessToken, currentToken)).rejects.toThrow(
+        new CustomError('입력된 토큰이 로그인 된 사용자의 토큰과 일치하지 않습니다.', 400),
+      );
+
+      expect(mockAuthService.verifyAccessToken).not.toHaveBeenCalled();
+      expect(mockUserRepo.removeRefreshToken).not.toHaveBeenCalled();
+    });
   });
 });
