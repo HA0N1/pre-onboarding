@@ -58,7 +58,7 @@ export class UserController {
     try {
       const { refreshToken } = req.body;
       if (!refreshToken) {
-        throw new CustomError('올바른 리프레쉬 토큰을 입력해야합니다.', 400);
+        throw new CustomError('리프레쉬 토큰이 제공되지 않았습니다.', 400);
       }
       const newAccessToken = await this.userService.refreshAccessToken(refreshToken);
       res.status(200).json({
@@ -75,6 +75,10 @@ export class UserController {
     try {
       const { accessToken } = req.body;
       const currentToken = req.token;
+
+      if (!accessToken) {
+        throw new CustomError('액세스 토큰이 제공되지 않았습니다.', 400);
+      }
 
       await this.userService.logout(accessToken, currentToken);
 
