@@ -106,9 +106,19 @@ describe('Service Test', () => {
   });
 
   describe('토큰 재발급', () => {
-    test('로그인 성공', async () => {});
+    test('재발급 성공', async () => {
+      const refreshToken = 'refresh-token';
+      const newAccessToken = 'new-access-token';
+
+      mockAuthService.refreshAccessToken.mockResolvedValue(newAccessToken);
+
+      const result = await userService.refreshAccessToken(refreshToken);
+
+      expect(mockAuthService.refreshAccessToken).toHaveBeenCalledWith(refreshToken);
+      expect(result).toBe(newAccessToken);
+    });
   });
   describe('로그아웃', () => {
-    test('로그인 성공', async () => {});
+    test('로그아웃 성공', async () => {});
   });
 });
