@@ -8,7 +8,7 @@ import errorHandler from './middleware/errorHandler.middleware.js';
 
 dotenv.config();
 const app = express();
-const PORT = 8080;
+const PORT = process.env.PORT || 8080;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -18,5 +18,5 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use(errorHandler);
 
 app.listen(PORT, () => {
-  console.log(PORT, '포트로 서버가 열렸어요!!');
+  console.log('서버가 정상적으로 열렸어요!!');
 });

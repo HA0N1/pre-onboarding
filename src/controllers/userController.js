@@ -6,7 +6,7 @@ export class UserController {
     this.authService = authService;
   }
 
-  register = async (req, res) => {
+  register = async (req, res, next) => {
     try {
       const { username, nickname, password } = req.body;
 
