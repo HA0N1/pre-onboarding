@@ -54,7 +54,7 @@ export class UserService {
   async verifyUser(username, password) {
     const user = await this.userRepo.findUserByUsername(username);
     if (!user) {
-      throw new CustomError('사용자명 또는 비밀번호가 올바르지 않습니다.', 401);
+      throw new CustomError('존재하지 않는 사용자입니다.', 401);
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password);

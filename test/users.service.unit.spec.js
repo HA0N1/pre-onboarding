@@ -7,7 +7,6 @@ describe('Service Test', () => {
   let mockUserRepo;
   let mockAuthService;
   let userService;
-  let mockBcrypt;
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -63,8 +62,46 @@ describe('Service Test', () => {
   describe('로그인', () => {
     test('로그인 성공', async () => {
       const userData = { username: 'testuser', password: 'password123' };
+      const hashedPassword = 'hash-password123';
+      const storedUser = { ...userData, password: hashedPassword };
       const accessToken = 'access-token';
       const refreshToken = 'refresh-token';
+
+      mockUserRepo.findUserByUsername.mockResolvedValue(storedUser);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(true);
+      mockAuthService.generateAccessToken.mockReturnValue(accessToken);
+      mockAuthService.generateRefreshToken.mockReturnValue(refreshToken);
+
+      mockUserRepo.saveRefreshToken.mockResolvedValue();
+
+      const result = await userService.login(userData.username, userData.password);
+      expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
+      expect(bcrypt.compare).toHaveBeenCalledWith(userData.password, hashedPassword);
+      expect(mockAuthService.generateAccessToken).toHaveBeenCalledWith({ username: userData.username });
+      expect(mockAuthService.generateRefreshToken).toHaveBeenCalledWith({ username: userData.username });
+      expect(mockUserRepo.saveRefreshToken).toHaveBeenCalledWith(userData.username, refreshToken);
+      expect(result).toEqual({ accessToken, refreshToken });
+    });
+    test('로그인 실패 - 존재하지 않는 사용자', async () => {
+      const userData = { username: 'nonexistent', password: 'password123' };
+
+      mockUserRepo.findUserByUsername.mockResolvedValue(null);
+
+      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(CustomError);
+      expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
+      expect(bcrypt.compare).not.toHaveBeenCalled();
+    });
+
+    test('로그인 실패 - 잘못된 비밀번호', async () => {
+      const userData = { username: 'testuser', password: 'wrongpassword' };
+      const storedUser = { ...userData, password: 'hashedpassword' };
+
+      mockUserRepo.findUserByUsername.mockResolvedValue(storedUser);
+      jest.spyOn(bcrypt, 'compare').mockResolvedValue(false);
+      await expect(userService.login(userData.username, userData.password)).rejects.toThrow(CustomError);
+
+      expect(mockUserRepo.findUserByUsername).toHaveBeenCalledWith(userData.username);
+      expect(bcrypt.compare).toHaveBeenCalledWith(userData.password, storedUser.password);
     });
   });
 
